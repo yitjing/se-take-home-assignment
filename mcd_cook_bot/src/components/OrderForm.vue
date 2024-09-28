@@ -1,65 +1,24 @@
 <!-- to allow customers to choose menu and submit the order -->
 <script setup>
   // create reactive reference that allows Vue to track for changes and update to DOM or trigger reaction
-  import { ref, onMounted } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-
-  // access the route query to get the memberType
-  const route = useRoute()
-  const router = useRouter()
+  import { ref } from 'vue'
+  import BotController from './BotController.vue'
 
   // retrieve the memberType from the route query params
   // if no query was retrieved from the route then Normal value is set as default
-  const memberType = ref(route.query.memberType || 'Normal') 
+  const memberType = ref('Normal')
 
   // define reactive references for the pending order details
   const pendingOrders = ref([])
   const completedOrders = ref([])
   let orderIdCounter = ref(1)
 
-  onMounted(() => {
-    // retrieve the submitted orders data from the local storage
-    const storedPendingOrders = localStorage.getItem('pendingOrders')
-
-    // checks if the data exist
-    if(storedPendingOrders){
-      // parse in the data from the local storage to the Javascript value
-      pendingOrders.value = JSON.parse(storedPendingOrders)
-      // updating the order id counter
-      orderIdCounter.value = pendingOrders.value.length + 1
-    }
-
-    // retrieve the completed orders data from the local storage
-    const storedCompletedOrders = localStorage.getItem('completedOrders')
-
-    // checks if the data exist
-    if(storedCompletedOrders){
-        // parse in the data from the local storage to the Javascript value
-        completedOrders.value = JSON.parse(storedCompletedOrders)
-    }
-  })
-
   const changeToNormal = () => {
     memberType.value = 'Normal'
-    router.push({
-      path: '/orderForm', 
-      // pass the member type to the orderForm page as query parameter
-      query: { memberType: 'Normal' } 
-    })
   }
 
   const changeToVIP = () => {
     memberType.value = 'VIP'
-    router.push({
-      path: '/orderForm', 
-      // pass the member type to the orderForm page as query parameter
-      query: { memberType: 'VIP' } 
-    })
-  }
-
-  // send the user back to the select member page
-  const goToHome = () => {
-    router.push('/')
   }
 
   // submit order selected by the customers to the local storage
@@ -87,21 +46,16 @@
       // normal orders will be push to the end of the list
       pendingOrders.value.push(newOrder)
     }
-
-    // save the pendingOrders data to the local storage
-    localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders.value))
   }
 
-  const clearOrders = () => {
+  const clearPendingOrders = () => {
     pendingOrders.value = []
     orderIdCounter.value = 1
-    localStorage.removeItem('pendingOrders')
     console.log('Pending orders cleared')
   }
   const clearCompletedOrders = () => {
     completedOrders.value = []
     orderIdCounter.value = 1
-    localStorage.removeItem('completedOrders')
     console.log('Completed orders cleared')
   }
 </script>
@@ -110,29 +64,25 @@
   <div class="order-form">
     <h1>Create Order ({{ memberType }} Member)</h1>
 
-    <div>
+    <div class="function-buttons">
       <button @click="changeToNormal">Normal Member</button>
       <button @click="changeToVIP">VIP Member</button>
-      <button @click="goToHome">Home</button>
-      <button @click="clearOrders">Clear All Orders</button>
+      <button @click="clearPendingOrders">Clear All Orders</button>
       <button @click="clearCompletedOrders">Clear All Completed Orders</button>
     </div>
 
     <!-- Menu -->
     <form @submit.prevent="submitOrder">
       <div class="menu-details">
-        <!-- images is taken from Unsplash -->
-        <img src="../assets/Images/amirali-mirhashemian-88YAXjnpvrM-unsplash.jpg" alt=""/>
+        Burger A
         <button type="submit">Submit Order</button>
       </div>
       <div class="menu-details">
-        <!-- images is taken from Unsplash -->
-        <img src="../assets/Images/amirali-mirhashemian-jh5XyK4Rr3Y-unsplash.jpg" alt=""/>
+        Burger B
         <button type="submit">Submit Order</button>
       </div>
       <div class="menu-details">
-        <!-- images is taken from Unsplash -->
-        <img src="../assets/Images/food-photographer-E94j3rMcxlw-unsplash.jpg" alt=""/>
+        Burger C
         <button type="submit">Submit Order</button>
       </div>
     </form>
@@ -140,10 +90,10 @@
     <!-- Pending Orders List -->
     <h2>Pending Orders</h2>
     <!-- display the pending orders data in a list -->
-     <!-- checks if the array have value-->
+    <!-- checks if the array have value-->
     <ul v-if="pendingOrders.length">
         <li v-for="order in pendingOrders" :key="order.id">
-        Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
+          Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
         </li>
     </ul>
     <p v-else>No pending orders.</p>
@@ -154,17 +104,25 @@
      <!-- checks if the array have value-->
     <ul v-if="completedOrders.length">
         <li v-for="order in completedOrders" :key="order.id">
-        Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
+          Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
         </li>
     </ul>
     <p v-else>No completed orders yet.</p>
   </div>
+
+  <!-- Cooking Bot Controller (Manager) -->
+  <BotController :pendOrders="pendingOrders" :compOrders="completedOrders"/>
 </template>
 
 <style scoped>
   .order-form{
     max-width: 900px;
     padding: 20px;
+  }
+  .function-buttons{
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
   }
   form{
     display: flex;
@@ -173,29 +131,6 @@
     gap: 40px;
   }
   .menu-details{
-    padding: 15px;
-    border: 1px solid grey;
-  }
-  button{
-    margin-top: 10px;
-    padding: 5px;
-    background-color: rgb(255, 230, 0);
-    font-size: 18px;
-    color: red;
-    border-style: none;
-    border-radius: 2px;
-  }
-  img{
-    width: 200px;
-    height: 200px;
-  }
-  ul{
-    list-style-type: none;
-    margin-bottom: 10px;
-    padding: 0;
-  }
-  li{
-    margin-bottom: 10px;
     padding: 10px;
     border: 1px solid grey;
   }

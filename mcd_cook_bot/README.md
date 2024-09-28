@@ -5,4 +5,4 @@ User stories:
 Installation Instructions:
 Features:
 Technologies Used:
-Vue.js, Node.js, vue-router
+Vue.js, Node.js,

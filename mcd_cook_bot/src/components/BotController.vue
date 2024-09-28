@@ -1,34 +1,19 @@
 <!-- manage the numbers of cooking bots -->
 <script setup>
-    import { ref, onMounted } from 'vue'
+    import { ref, defineProps } from 'vue'
+
+    const props = defineProps({
+        pendOrders: Array,
+        compOrders: Array,
+    });
 
     // define reactive references for the pending, completed orders and bots
-    const pendingOrders = ref([])
-    const completedOrders = ref([])
+    const pendingOrders = ref(props.pendOrders);
+    const completedOrders = ref(props.compOrders);
     const bots = ref([])
 
     // to keep track of the number of bots available for processing the order
     let botIdCounter = 0
-
-    onMounted(() => {
-        // retrieve the submitted orders data from the local storage
-        const storedPendingOrders = localStorage.getItem('pendingOrders')
-
-        // checks if the data exist
-        if(storedPendingOrders){
-            // parse in the data from the local storage to the Javascript value
-            pendingOrders.value = JSON.parse(storedPendingOrders)
-        }
-
-        // retrieve the complete orders data from the local storage
-        const storedCompletedOrders = localStorage.getItem('completedOrders')
-
-        // checks if the data exist
-        if(storedCompletedOrders){
-            // parse in the data from the local storage to the Javascript value
-            completedOrders.value = JSON.parse(storedCompletedOrders)
-        }
-    })
 
     // add new cooking bot to process the pending order
     const addBot = () => {
@@ -60,8 +45,6 @@
 
                 // return the order back to the pending state
                 pendingOrders.value.unshift(botToRemove.order)
-                // update the orders data in the local storage
-                updateOrdersInLocalStorage()
             }
         }
     }
@@ -78,7 +61,6 @@
             // update the order data to help the manager from keeping track of the specific order
             // process by the bot
             bot.order = order
-            updateOrdersInLocalStorage()
 
             // set the processing time to 10 seconds to complete the order
             bot.timeoutId = setTimeout(() => {
@@ -104,23 +86,15 @@
         bot.order = null
         bot.timeoutId = null
 
-        updateOrdersInLocalStorage()
-
         // after completing it will check if there are more orders 
         // that need to be processing
         processNextOrder(bot)
-    }
-
-    // to update the pending and completed orders data in the local storage
-    const updateOrdersInLocalStorage = () => {
-        localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders.value))
-        localStorage.setItem('completedOrders', JSON.stringify(completedOrders.value))
     }
 </script>
 
 <template>
     <div class="bot-controller">
-        <h1>Cooking Bot Controller</h1>
+        <h1>Cooking Bot Controller (Manager)</h1>
 
         <div class="orders-list">
             <!-- Pending Orders List -->
@@ -194,9 +168,6 @@
         margin-bottom: 10px;
         padding: 10px;
         border: 1px solid grey;
-    }
-    p{
-        font-size: 18px;
     }
     button{
         margin: 0px 15px 15px 0px;
