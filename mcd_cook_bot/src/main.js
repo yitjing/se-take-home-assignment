@@ -5,14 +5,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import SelectMember from './components/SelectMember.vue'
 import OrderForm from './components/OrderForm.vue'
-import OrderList from './components/OrderList.vue'
 import BotController from './components/BotController.vue'
 
 // create routes that maps URL paths to components
 const routes = [
     {path: '/', component: SelectMember},
     {path: '/orderForm', component: OrderForm},
-    {path: '/orderList', component: OrderList},
     {path: '/botController', component: BotController},
 ]
 

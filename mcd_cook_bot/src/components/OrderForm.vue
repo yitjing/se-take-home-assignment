@@ -12,8 +12,9 @@
   // if no query was retrieved from the route then Normal value is set as default
   const memberType = ref(route.query.memberType || 'Normal') 
 
-  // define state for the pending order details
+  // define reactive references for the pending order details
   const pendingOrders = ref([])
+  const completedOrders = ref([])
   let orderIdCounter = ref(1)
 
   onMounted(() => {
@@ -26,6 +27,15 @@
       pendingOrders.value = JSON.parse(storedPendingOrders)
       // updating the order id counter
       orderIdCounter.value = pendingOrders.value.length + 1
+    }
+
+    // retrieve the completed orders data from the local storage
+    const storedCompletedOrders = localStorage.getItem('completedOrders')
+
+    // checks if the data exist
+    if(storedCompletedOrders){
+        // parse in the data from the local storage to the Javascript value
+        completedOrders.value = JSON.parse(storedCompletedOrders)
     }
   })
 
@@ -52,6 +62,7 @@
     router.push('/')
   }
 
+  // submit order selected by the customers to the local storage
   const submitOrder = () => {
     // order data
     const newOrder = {
@@ -60,6 +71,7 @@
       status: 'Pending'
     }
 
+    // conditions where it sorts the order according to the member privilege
     if(memberType.value === 'VIP'){
       // the VIP orders will be placed before all Normal orders but it will queue behind the existed VIP order
       const firstNormalIndex = pendingOrders.value.findIndex(order => order.type === 'Normal')
@@ -78,12 +90,6 @@
 
     // save the pendingOrders data to the local storage
     localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders.value))
-
-    // redirect to the order list page after submit the order
-    router.push({
-      path: '/orderList',
-      query: { memberType: memberType.value }
-    })
   }
 
   const clearOrders = () => {
@@ -92,33 +98,105 @@
     localStorage.removeItem('pendingOrders')
     console.log('Pending orders cleared')
   }
+  const clearCompletedOrders = () => {
+    completedOrders.value = []
+    orderIdCounter.value = 1
+    localStorage.removeItem('completedOrders')
+    console.log('Completed orders cleared')
+  }
 </script>
   
 <template>
-  <button @click="changeToNormal">Normal Member</button>
-  <button @click="changeToVIP">VIP Member</button>
-  <button @click="goToHome">Home</button>
-  <button @click="clearOrders">Clear All Orders</button>
+  <div class="order-form">
+    <h1>Create Order ({{ memberType }} Member)</h1>
 
-  <h2>Create Order ({{ memberType }} Member)</h2>
-  <form @submit.prevent="submitOrder">
     <div>
-      <!-- Menu -->
-      <!-- images is taken from Unsplash -->
-      <img src="../assets/Images/amirali-mirhashemian-88YAXjnpvrM-unsplash.jpg" alt="" width="200"/>
-      <button type="submit">Submit Order</button>
+      <button @click="changeToNormal">Normal Member</button>
+      <button @click="changeToVIP">VIP Member</button>
+      <button @click="goToHome">Home</button>
+      <button @click="clearOrders">Clear All Orders</button>
+      <button @click="clearCompletedOrders">Clear All Completed Orders</button>
     </div>
-    <div>
-      <!-- Menu -->
-      <!-- images is taken from Unsplash -->
-      <img src="../assets/Images/amirali-mirhashemian-jh5XyK4Rr3Y-unsplash.jpg" alt="" width="200"/>
-      <button type="submit">Submit Order</button>
-    </div>
-    <div>
-      <!-- Menu -->
-      <!-- images is taken from Unsplash -->
-      <img src="../assets/Images/food-photographer-E94j3rMcxlw-unsplash.jpg" alt="" width="200"/>
-      <button type="submit">Submit Order</button>
-    </div>
-  </form>
+
+    <!-- Menu -->
+    <form @submit.prevent="submitOrder">
+      <div class="menu-details">
+        <!-- images is taken from Unsplash -->
+        <img src="../assets/Images/amirali-mirhashemian-88YAXjnpvrM-unsplash.jpg" alt=""/>
+        <button type="submit">Submit Order</button>
+      </div>
+      <div class="menu-details">
+        <!-- images is taken from Unsplash -->
+        <img src="../assets/Images/amirali-mirhashemian-jh5XyK4Rr3Y-unsplash.jpg" alt=""/>
+        <button type="submit">Submit Order</button>
+      </div>
+      <div class="menu-details">
+        <!-- images is taken from Unsplash -->
+        <img src="../assets/Images/food-photographer-E94j3rMcxlw-unsplash.jpg" alt=""/>
+        <button type="submit">Submit Order</button>
+      </div>
+    </form>
+
+    <!-- Pending Orders List -->
+    <h2>Pending Orders</h2>
+    <!-- display the pending orders data in a list -->
+     <!-- checks if the array have value-->
+    <ul v-if="pendingOrders.length">
+        <li v-for="order in pendingOrders" :key="order.id">
+        Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
+        </li>
+    </ul>
+    <p v-else>No pending orders.</p>
+
+    <!-- Complete Orders List -->
+    <h2>Complete Orders</h2>
+    <!-- display the completed orders data in a list -->
+     <!-- checks if the array have value-->
+    <ul v-if="completedOrders.length">
+        <li v-for="order in completedOrders" :key="order.id">
+        Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
+        </li>
+    </ul>
+    <p v-else>No completed orders yet.</p>
+  </div>
 </template>
+
+<style scoped>
+  .order-form{
+    max-width: 900px;
+    padding: 20px;
+  }
+  form{
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 25px;
+    gap: 40px;
+  }
+  .menu-details{
+    padding: 15px;
+    border: 1px solid grey;
+  }
+  button{
+    margin-top: 10px;
+    padding: 5px;
+    background-color: rgb(255, 230, 0);
+    font-size: 18px;
+    color: red;
+    border-style: none;
+    border-radius: 2px;
+  }
+  img{
+    width: 200px;
+    height: 200px;
+  }
+  ul{
+    list-style-type: none;
+    margin-bottom: 10px;
+    padding: 0;
+  }
+  li{
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid grey;
+  }
+</style>

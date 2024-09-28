@@ -43,3 +43,21 @@
         <button type="submit">Login</button>
     </form>
 </template>
+
+<style scoped>
+    label{
+        font-size: 20px;
+    }
+    select{
+        font-size: 20px;
+    }
+    button{
+        margin-top: 10px;
+        padding: 5px;
+        background-color: rgb(45, 45, 255);
+        font-size: 18px;
+        color: white;
+        border-style: none;
+        border-radius: 2px;
+    }
+</style>
