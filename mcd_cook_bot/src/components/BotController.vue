@@ -93,16 +93,16 @@
 </script>
 
 <template>
-    <div class="bot-controller">
+    <div class='bot-controller'>
         <h1>Cooking Bot Controller (Manager)</h1>
 
-        <div class="orders-list">
+        <div class='orders-list'>
             <!-- Pending Orders List -->
             <h2>Pending Orders</h2>
             <!-- display the pending orders data in a list -->
             <!-- checks if the array have value-->
-            <ul v-if="pendingOrders.length">
-                <li v-for="order in pendingOrders" :key="order.id">
+            <ul v-if='pendingOrders.length'>
+                <li v-for='order in pendingOrders' :key='order.id'>
                     Order #{{ order.id }} - {{ order.type }} - Status: {{ order.status }}
                 </li>
             </ul>
@@ -112,8 +112,8 @@
             <h2>Complete Orders</h2>
             <!-- display the complete orders data in a list -->
             <!-- checks if the array have value-->
-            <ul v-if="completedOrders.length">
-                <li v-for="order in completedOrders" :key="order.id">
+            <ul v-if='completedOrders.length'>
+                <li v-for='order in completedOrders' :key='order.id'>
                     Order #{{ order.id }} - {{ order.type }} - Status: {{ order.status }}
                 </li>
             </ul>
@@ -124,10 +124,10 @@
         <h2>Bots</h2>
         <div>
             <!-- display the total available working bot -->
-            <p>Total Bots: {{ bots.length }}</p>
+            <p data-testid='botsNumber'>Total Bots: {{ bots.length }}</p>
             <!-- add and remove bot button -->
-            <button @click="addBot">Add Bot (+)</button>
-            <button @click="removeBot" :disabled="bots.length === 0">Remove Bot (-)</button>
+            <button data-testid='addBotButton' @click='addBot'>+ Bot</button>
+            <button data-testid='removeBotButton' @click='removeBot' :disabled='bots.length === 0'>- Bot</button>
         </div>
 
         <!-- Active Bots Status -->
@@ -135,9 +135,9 @@
         <!-- display a list of active bot -->
         <ul>
             <!-- key attribute was included to give of the order an unique identifier -->
-            <li v-for="(bot, index) in bots" :key="index">
+            <li v-for='(bot, index) in bots' :key='index'>
                 Bot #{{ bot.id }} - 
-                <span v-if="bot.order">
+                <span v-if='bot.order'>
                     Processing Order #{{ bot.order.id }}
                 </span>
                 <span v-else>
@@ -173,6 +173,6 @@
         margin: 0px 15px 15px 0px;
         padding: 5px;
         font-size: 18px;
-        border-radius: 2px;
+        border-radius: 3px;
     }
 </style>

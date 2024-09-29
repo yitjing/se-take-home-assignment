@@ -4,21 +4,26 @@
   import { ref } from 'vue'
   import BotController from './BotController.vue'
 
-  // retrieve the memberType from the route query params
-  // if no query was retrieved from the route then Normal value is set as default
-  const memberType = ref('Normal')
+  // define reactive references for the member type of the user (Normal or VIP)
+  const memberType = ref('')
 
-  // define reactive references for the pending order details
+  // define reactive references for the pending and completed order details
   const pendingOrders = ref([])
   const completedOrders = ref([])
   let orderIdCounter = ref(1)
 
-  const changeToNormal = () => {
+  // submit normal order
+  const submitNormalOrder = () => {
     memberType.value = 'Normal'
+
+    submitOrder()
   }
 
-  const changeToVIP = () => {
+  // submit VIP order
+  const submitVIPOrder = () => {
     memberType.value = 'VIP'
+
+    submitOrder()
   }
 
   // submit order selected by the customers to the local storage
@@ -47,52 +52,23 @@
       pendingOrders.value.push(newOrder)
     }
   }
-
-  const clearPendingOrders = () => {
-    pendingOrders.value = []
-    orderIdCounter.value = 1
-    console.log('Pending orders cleared')
-  }
-  const clearCompletedOrders = () => {
-    completedOrders.value = []
-    orderIdCounter.value = 1
-    console.log('Completed orders cleared')
-  }
 </script>
   
 <template>
-  <div class="order-form">
-    <h1>Create Order ({{ memberType }} Member)</h1>
+  <div class='order-form'>
+    <h1>Create Order</h1>
 
-    <div class="function-buttons">
-      <button @click="changeToNormal">Normal Member</button>
-      <button @click="changeToVIP">VIP Member</button>
-      <button @click="clearPendingOrders">Clear All Orders</button>
-      <button @click="clearCompletedOrders">Clear All Completed Orders</button>
+    <div class='function-buttons'>
+      <button data-testid='normalOrderButton' @click='submitNormalOrder'>New Normal Order</button>
+      <button data-testid='vipOrderButton' @click='submitVIPOrder'>New VIP Order</button>
     </div>
-
-    <!-- Menu -->
-    <form @submit.prevent="submitOrder">
-      <div class="menu-details">
-        Burger A
-        <button type="submit">Submit Order</button>
-      </div>
-      <div class="menu-details">
-        Burger B
-        <button type="submit">Submit Order</button>
-      </div>
-      <div class="menu-details">
-        Burger C
-        <button type="submit">Submit Order</button>
-      </div>
-    </form>
 
     <!-- Pending Orders List -->
     <h2>Pending Orders</h2>
     <!-- display the pending orders data in a list -->
     <!-- checks if the array have value-->
-    <ul v-if="pendingOrders.length">
-        <li v-for="order in pendingOrders" :key="order.id">
+    <ul v-if='pendingOrders.length'>
+        <li v-for='order in pendingOrders' :key='order.id'>
           Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
         </li>
     </ul>
@@ -102,8 +78,8 @@
     <h2>Complete Orders</h2>
     <!-- display the completed orders data in a list -->
      <!-- checks if the array have value-->
-    <ul v-if="completedOrders.length">
-        <li v-for="order in completedOrders" :key="order.id">
+    <ul v-if='completedOrders.length'>
+        <li v-for='order in completedOrders' :key='order.id'>
           Order #{{ order.id }} - {{ order.type }} - {{ order.status }}
         </li>
     </ul>
@@ -111,7 +87,7 @@
   </div>
 
   <!-- Cooking Bot Controller (Manager) -->
-  <BotController :pendOrders="pendingOrders" :compOrders="completedOrders"/>
+  <BotController :pendOrders='pendingOrders' :compOrders='completedOrders'/>
 </template>
 
 <style scoped>
@@ -122,13 +98,14 @@
   .function-buttons{
     display: flex;
     margin-top: 10px;
+    margin-bottom: 15px;
     gap: 10px;
   }
-  form{
-    display: flex;
-    margin-top: 10px;
-    margin-bottom: 25px;
-    gap: 40px;
+  button{
+    margin: 0px 15px 15px 0px;
+    padding: 5px;
+    font-size: 18px;
+    border-radius: 3px;
   }
   .menu-details{
     padding: 10px;
