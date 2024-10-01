@@ -44,7 +44,7 @@
         // if there is no Normal orders, the VIP order will be push to the end
         pendingOrders.value.push(newOrder)
       }else{
-        // if there is a VIP order in the list, it will be insert behind it
+        // if there is a normal order in the list, it will be insert behind it
         pendingOrders.value.splice(firstNormalIndex, 0, newOrder)
       }
     }else{
