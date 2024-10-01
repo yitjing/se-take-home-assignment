@@ -26,7 +26,7 @@
     submitOrder()
   }
 
-  // submit order selected by the customers to the local storage
+  // submit order selected by the customers
   const submitOrder = () => {
     // order data
     const newOrder = {
