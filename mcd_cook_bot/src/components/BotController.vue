@@ -1,6 +1,6 @@
 <!-- manage the numbers of cooking bots -->
 <script setup>
-    import { ref, defineProps } from 'vue'
+    import { ref, defineProps, reactive } from 'vue'
 
     const props = defineProps({
         pendOrders: Array,
@@ -10,10 +10,12 @@
     // define reactive references for the pending, completed orders and bots
     const pendingOrders = ref(props.pendOrders);
     const completedOrders = ref(props.compOrders);
-    const bots = ref([])
+    const bots = reactive([]);
 
     // to keep track of the number of bots available for processing the order
     let botIdCounter = 0
+    // to keep track of the 10 second processing time
+    let timer = reactive({ count:1 })
 
     // add new cooking bot to process the pending order
     const addBot = () => {
@@ -22,10 +24,12 @@
             status: 'Idle',
             order: null,
             timeoutId: null,
+            // to keep track of the interval id
+            counterIntervalId: null,
         }
 
         // add new bot data to the reactive ref
-        bots.value.push(bot)
+        bots.push(bot)
         // process with the first pending order on the list
         processNextOrder(bot)
     }
@@ -33,7 +37,7 @@
     // to remove the most recent cooking bot added by the manager to process the pending order
     const removeBot = () => {
         // remove the bot from the array
-        const botToRemove = bots.value.pop()
+        const botToRemove = bots.pop()
 
         if(botToRemove){
             // if the bot is processing then stop its process and return the order back to pending
@@ -42,6 +46,8 @@
                 // to clear the timeout to stop the current processing and prevent the order from 
                 // continuing processing even without any bot
                 clearTimeout(botToRemove.timeoutId)
+
+                clearInterval(botToRemove.counterIntervalId)
 
                 // return the order back to the pending state
                 pendingOrders.value.unshift(botToRemove.order)
@@ -62,10 +68,21 @@
             // process by the bot
             bot.order = order
 
+            // set the timer counter value back to 0
+            timer.count = 0
+
             // set the processing time to 10 seconds to complete the order
             bot.timeoutId = setTimeout(() => {
                 completeOrder(bot)
             }, 10000)
+
+            // set a timer that shows the manager the timeout of the process
+            // increase the value by 1 for each seconds
+            bot.counterIntervalId = setInterval(() => {
+                // console.log(timer.count);
+                timer.count++
+                // bot.counterValue++
+            }, 1000)
 
         }else{
             // when there is no more pending order in the list and
@@ -85,6 +102,9 @@
         bot.status = 'Idle'
         bot.order = null
         bot.timeoutId = null
+        bot.counterInternalId = null
+
+        clearInterval(bot.counterIntervalId)
 
         // after completing it will check if there are more orders 
         // that need to be processing
@@ -138,7 +158,7 @@
             <li v-for='(bot, index) in bots' :key='index'>
                 Bot #{{ bot.id }} - 
                 <span v-if='bot.order'>
-                    Processing Order #{{ bot.order.id }}
+                    Processing Order #{{ bot.order.id }} Time: {{ timer.count }} seconds
                 </span>
                 <span v-else>
                     {{ bot.status }}
